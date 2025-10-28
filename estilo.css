@@ -54,3 +54,54 @@ select {
   width: auto;
   display: block;
 }
+
+/* O contêiner do mapa ocupa a tela inteira */
+html, body, #viewDiv {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* Painel base */
+#painelLegenda {
+  transition: width .2s ease, right .2s ease, left .2s ease, top .2s ease;
+  max-width: 360px;
+}
+
+/* Conteúdo rolável quando aberto */
+#painelLegenda .conteudo {
+  max-height: 50vh;           /* desktop padrão */
+  overflow-y: auto;
+}
+
+/* Responsivo para telas <= 768px */
+@media (max-width: 768px) {
+  #painelLegenda {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    top: 10px;
+    width: 92vw;              /* quase toda a largura */
+    max-width: 92vw;
+    z-index: 10;
+  }
+  #painelLegenda .header {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+  #painelLegenda .conteudo {
+    padding: 10px 12px !important;
+    max-height: 60vh;         /* mais alto em mobile */
+  }
+  #painelLegenda label {
+    font-size: 13px !important;
+  }
+}
+
+/* Muito pequenas (<= 420px) */
+@media (max-width: 420px) {
+  #painelLegenda .conteudo {
+    max-height: 65vh;
+  }
+}
