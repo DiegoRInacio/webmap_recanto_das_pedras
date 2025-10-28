@@ -28,11 +28,6 @@ select {
   width: 100%;
 }
 
-#viewDiv {
-  height: calc(100vh - 50px);
-  width: 100%;
-}
-
 #painelCamadas h3 {
   margin-top: 0;
   margin-bottom: 8px;
@@ -41,8 +36,8 @@ select {
 
 #rodape-imagem {
   position: absolute;
-  bottom: 5px;          /* distância da base */
-  right: 15px;          /* distância da borda direita */
+  bottom: 5px;
+  right: 15px;
   z-index: 99;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 8px;
@@ -55,7 +50,6 @@ select {
   display: block;
 }
 
-/* O contêiner do mapa ocupa a tela inteira */
 html, body, #viewDiv {
   margin: 0;
   padding: 0;
@@ -63,39 +57,51 @@ html, body, #viewDiv {
   width: 100%;
 }
 
-/* Painel base */
 #painelLegenda {
   transition: width .2s ease, right .2s ease, left .2s ease, top .2s ease;
   max-width: 360px;
+  z-index: 1000;
 }
 
-/* Conteúdo rolável quando aberto */
 #painelLegenda .conteudo {
-  max-height: 50vh;           /* desktop padrão */
+  max-height: 50vh;
   overflow-y: auto;
 }
 
 /* Responsivo para telas <= 768px */
 @media (max-width: 768px) {
   #painelLegenda {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    top: 10px;
-    width: 92vw;              /* quase toda a largura */
-    max-width: 92vw;
-    z-index: 10;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    top: 60px !important;
+    width: 94vw !important;
+    max-width: 94vw !important;
+    min-width: 94vw !important;
   }
+  
   #painelLegenda .header {
     padding: 8px 10px;
     font-size: 14px;
   }
+  
   #painelLegenda .conteudo {
     padding: 10px 12px !important;
-    max-height: 60vh;         /* mais alto em mobile */
+    max-height: 60vh;
+    font-size: 13px;
   }
+  
   #painelLegenda label {
     font-size: 13px !important;
+  }
+
+  #rodape-imagem {
+    bottom: 10px;
+    right: 10px;
+  }
+
+  #rodape-imagem img {
+    height: 35px;
   }
 }
 
@@ -103,5 +109,9 @@ html, body, #viewDiv {
 @media (max-width: 420px) {
   #painelLegenda .conteudo {
     max-height: 65vh;
+  }
+  
+  #painelLegenda {
+    top: 55px !important;
   }
 }

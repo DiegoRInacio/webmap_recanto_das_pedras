@@ -93,19 +93,22 @@ require([
   const painel = document.createElement("div");
   painel.id = "painelLegenda";
   painel.style.cssText = `
-    position: absolute;
-    top: 70px;
-    right: 10px;
     background: rgba(255,255,255,0.95);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0,0,0,0.3);
     font-family: Arial, sans-serif;
-    min-width: 260px;
     font-size: 14px;
     overflow: hidden;
     pointer-events: auto;
-    z-index: 1000;
   `;
+
+  // Só define posição inline em telas maiores (desktop)
+  if (!window.matchMedia("(max-width: 768px)").matches) {
+    painel.style.position = "absolute";
+    painel.style.top = "70px";
+    painel.style.right = "10px";
+    painel.style.minWidth = "260px";
+  }
 
   const header = document.createElement("div");
   header.className = "header";
