@@ -158,28 +158,28 @@ require([
     label.appendChild(nomeTexto);
     conteudo.appendChild(label);
 
-    // Se for Unidades de Conservação → adiciona nomes das UCs
-    if (nome === "Unidades de Conservação") {
-      layer.when(() => {
-        layer.queryFeatures().then(res => {
-          const listaUC = document.createElement("div");
-          listaUC.style.margin = "5px 0 5px 28px";
-          listaUC.style.maxHeight = "150px";
-          listaUC.style.overflowY = "auto";
-          listaUC.style.borderLeft = "2px solid #ccc";
-          listaUC.style.paddingLeft = "8px";
+    // // Se for Unidades de Conservação → adiciona nomes das UCs
+    // if (nome === "Unidades de Conservação") {
+    //   layer.when(() => {
+    //     layer.queryFeatures().then(res => {
+    //       const listaUC = document.createElement("div");
+    //       listaUC.style.margin = "5px 0 5px 28px";
+    //       listaUC.style.maxHeight = "150px";
+    //       listaUC.style.overflowY = "auto";
+    //       listaUC.style.borderLeft = "2px solid #ccc";
+    //       listaUC.style.paddingLeft = "8px";
 
-          res.features.forEach(f => {
-            const uc = f.attributes;
-            const item = document.createElement("div");
-            item.style.marginBottom = "4px";
-            item.textContent = uc.nome || "(Sem nome)";
-            listaUC.appendChild(item);
-          });
+    //       res.features.forEach(f => {
+    //         const uc = f.attributes;
+    //         const item = document.createElement("div");
+    //         item.style.marginBottom = "4px";
+    //         item.textContent = uc.nome || "(Sem nome)";
+    //         listaUC.appendChild(item);
+    //       });
 
-          conteudo.appendChild(listaUC);
-        });
-      });
+    //       conteudo.appendChild(listaUC);
+    //     });
+    //   });
     }
   });
 
