@@ -101,28 +101,24 @@ require([
     pointer-events: auto;
   `;
 
-  // ---- Corrige o posicionamento absoluto imposto pelo ArcGIS ----
-  if (window.matchMedia("(max-width: 768px)").matches) {
-    // Remove o painel da hierarquia da view e joga direto no body
-    document.body.appendChild(painel);
-
-    // Reposiciona manualmente
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+  if (isMobile) {
     painel.style.position = "fixed";
     painel.style.left = "0";
     painel.style.right = "0";
     painel.style.bottom = "0";
-    painel.style.top = "auto";
-    painel.style.margin = "0";
-    painel.style.width = "100vw";
-    painel.style.maxHeight = "50vh"; // metade da tela vertical
+    painel.style.maxHeight = "50vh";
     painel.style.overflowY = "auto";
     painel.style.borderRadius = "12px 12px 0 0";
+    painel.style.margin = "0 8px";
     painel.style.zIndex = "9999";
-
-    // Garante que o painel esteja sempre visível
-    setTimeout(() => {
-      painel.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 500);
+  } else {
+    painel.style.position = "absolute";
+    painel.style.top = "70px";
+    painel.style.right = "10px";
+    painel.style.minWidth = "260px";
+    painel.style.maxHeight = "calc(100vh - 100px)";
+    painel.style.overflowY = "auto";
   }
 
   const header = document.createElement("div");
@@ -146,11 +142,10 @@ require([
     display: none;
   `;
 
-  const isMobile = window.matchMedia("(max-width: 768px)").matches;
   conteudo.style.display = isMobile ? "none" : "block";
   header.textContent = isMobile ? "Legenda ▼" : "Legenda ▲";
 
-  // ---- FUNÇÃO PARA MONTAR A LEGENDA ----
+  // ---- FUNÇÃO: Reconstruir conteúdo da legenda ----
   function rebuildLegendContent() {
     conteudo.innerHTML = "";
 
@@ -175,15 +170,55 @@ require([
       simbolo.style.marginRight = "8px";
       simbolo.style.border = "1px solid #666";
       simbolo.style.borderRadius = "2px";
+
       const r = layer.renderer;
-      simbolo.style.backgroundColor = r?.symbol?.color || "#ccc";
+      if (r?.type === "unique-value") {
+        const c = r.defaultSymbol?.color || "#00e0ff";
+        simbolo.style.backgroundColor = c;
+      } else {
+        simbolo.style.backgroundColor = r?.symbol?.color || "#ccc";
+      }
 
       const nomeTexto = document.createElement("span");
       nomeTexto.textContent = nome;
+      nomeTexto.style.whiteSpace = "nowrap";
+
       label.appendChild(checkbox);
       label.appendChild(simbolo);
       label.appendChild(nomeTexto);
       conteudo.appendChild(label);
+
+      // ---- Subitens das trilhas com cor individual ----
+      if (nome === "Trilhas" && layer.renderer?.uniqueValueInfos?.length) {
+        const sub = document.createElement("div");
+        sub.style.margin = "6px 0 6px 28px";
+        sub.style.maxHeight = "150px";
+        sub.style.overflowY = "auto";
+
+        layer.renderer.uniqueValueInfos.forEach(info => {
+          const row = document.createElement("div");
+          row.style.display = "flex";
+          row.style.alignItems = "center";
+          row.style.marginBottom = "4px";
+
+          const sw = document.createElement("span");
+          sw.style.display = "inline-block";
+          sw.style.width = "22px";
+          sw.style.height = "10px";
+          sw.style.marginRight = "8px";
+          sw.style.border = "1px solid #666";
+          sw.style.borderRadius = "2px";
+          sw.style.backgroundColor = info.symbol.color;
+
+          const txt = document.createElement("span");
+          txt.textContent = info.label;
+
+          row.appendChild(sw);
+          row.appendChild(txt);
+          sub.appendChild(row);
+        });
+        conteudo.appendChild(sub);
+      }
     });
   }
 
@@ -198,6 +233,39 @@ require([
   painel.appendChild(header);
   painel.appendChild(conteudo);
   view.ui.add(painel, "top-right");
+
+  // ---- Corrige posição e visibilidade no modo mobile ----
+  if (isMobile) {
+    if (!document.body.contains(painel)) {
+      document.body.appendChild(painel);
+    }
+
+    painel.style.position = "fixed";
+    painel.style.left = "0";
+    painel.style.right = "0";
+    painel.style.bottom = "0";
+    painel.style.top = "auto";
+    painel.style.margin = "0";
+    painel.style.width = "100vw";
+    painel.style.maxHeight = "50vh";
+    painel.style.overflowY = "auto";
+    painel.style.borderRadius = "12px 12px 0 0";
+    painel.style.zIndex = "9999";
+    painel.style.display = "block";
+    painel.style.opacity = "1";
+
+    setTimeout(() => {
+      painel.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 400);
+  }
+
+  // ---- Reconstrói legenda após todas as camadas carregarem ----
+  view.whenLayerView(map.layers).then(() => {
+    setTimeout(() => {
+      rebuildLegendContent();
+      painel.style.display = "block";
+    }, 800);
+  });
 
   // ---- CAMADAS ----
   camadas.forEach(cfg => {
@@ -223,14 +291,19 @@ require([
         q.returnGeometry = false;
         q.outFields = ["Nome"];
         const { features } = await trilhasLayer.queryFeatures(q);
+
         const uniq = [...new Set(features.map(f => f.attributes.Nome))];
         renderer.uniqueValueInfos = uniq.map((v, i) => ({
           value: v,
           label: v,
           symbol: { type: "simple-line", color: palette[i % palette.length], width: 2.5 }
         }));
+
         trilhasLayer.renderer = renderer;
-        rebuildLegendContent();
+
+        setTimeout(() => {
+          rebuildLegendContent();
+        }, 300);
       });
 
       map.add(trilhasLayer);
