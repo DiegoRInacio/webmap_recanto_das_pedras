@@ -101,23 +101,28 @@ require([
     pointer-events: auto;
   `;
 
-  if (!window.matchMedia("(max-width: 768px)").matches) {
-    painel.style.position = "absolute";
-    painel.style.top = "70px";
-    painel.style.right = "10px";
-    painel.style.minWidth = "260px";
-    painel.style.maxHeight = "calc(100vh - 100px)";
-    painel.style.overflowY = "auto";
-  } else {
+  // ---- Corrige o posicionamento absoluto imposto pelo ArcGIS ----
+  if (window.matchMedia("(max-width: 768px)").matches) {
+    // Remove o painel da hierarquia da view e joga direto no body
+    document.body.appendChild(painel);
+
+    // Reposiciona manualmente
     painel.style.position = "fixed";
-    painel.style.bottom = "0";
     painel.style.left = "0";
     painel.style.right = "0";
-    painel.style.borderRadius = "12px 12px 0 0";
-    painel.style.maxHeight = "50vh";
+    painel.style.bottom = "0";
+    painel.style.top = "auto";
+    painel.style.margin = "0";
+    painel.style.width = "100vw";
+    painel.style.maxHeight = "50vh"; // metade da tela vertical
     painel.style.overflowY = "auto";
-    painel.style.margin = "0 8px";
+    painel.style.borderRadius = "12px 12px 0 0";
     painel.style.zIndex = "9999";
+
+    // Garante que o painel esteja sempre visível
+    setTimeout(() => {
+      painel.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 500);
   }
 
   const header = document.createElement("div");
