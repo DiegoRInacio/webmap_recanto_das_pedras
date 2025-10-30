@@ -76,20 +76,20 @@ require([
 
   const layersDict = {};
 
-  // Paleta fixa para "Nome" das trilhas
+  // Paleta de cores fixa para as trilhas
   const palette = [
     "#00ffd0","#00bfff","#40ff00","#ff9900",
     "#ff00aa","#aa00ff","#ffd400","#00ff66",
     "#ff0066","#00aaff","#66ffcc","#33cc33"
   ];
 
-  // Helper para gerar renderer de linhas com cor única
+  // Renderer simples de linha
   const simpleLineRenderer = (color, width=2) => ({
     type: "simple",
     symbol: { type: "simple-line", color, width }
   });
 
-  // ---- PAINEL RETRÁTIL (LEGENDA) ----
+  // ---- PAINEL LEGENDA ----
   const painel = document.createElement("div");
   painel.id = "painelLegenda";
   painel.style.cssText = `
@@ -98,16 +98,26 @@ require([
     box-shadow: 0 0 10px rgba(0,0,0,0.3);
     font-family: Arial, sans-serif;
     font-size: 14px;
-    overflow: hidden;
     pointer-events: auto;
   `;
 
-  // Só define posição inline em telas maiores (desktop)
   if (!window.matchMedia("(max-width: 768px)").matches) {
     painel.style.position = "absolute";
     painel.style.top = "70px";
     painel.style.right = "10px";
     painel.style.minWidth = "260px";
+    painel.style.maxHeight = "calc(100vh - 100px)";
+    painel.style.overflowY = "auto";
+  } else {
+    painel.style.position = "fixed";
+    painel.style.bottom = "0";
+    painel.style.left = "0";
+    painel.style.right = "0";
+    painel.style.borderRadius = "12px 12px 0 0";
+    painel.style.maxHeight = "50vh";
+    painel.style.overflowY = "auto";
+    painel.style.margin = "0 8px";
+    painel.style.zIndex = "9999";
   }
 
   const header = document.createElement("div");
@@ -135,7 +145,7 @@ require([
   conteudo.style.display = isMobile ? "none" : "block";
   header.textContent = isMobile ? "Legenda ▼" : "Legenda ▲";
 
-  // Função para refazer o conteúdo da legenda com subitens das Trilhas
+  // ---- FUNÇÃO PARA MONTAR A LEGENDA ----
   function rebuildLegendContent() {
     conteudo.innerHTML = "";
 
@@ -160,118 +170,31 @@ require([
       simbolo.style.marginRight = "8px";
       simbolo.style.border = "1px solid #666";
       simbolo.style.borderRadius = "2px";
-
-      // Cor do símbolo principal
       const r = layer.renderer;
-      if (r?.type === "unique-value") {
-        const c = r.defaultSymbol?.color || "#00e0ff";
-        simbolo.style.backgroundColor = c;
-      } else {
-        simbolo.style.backgroundColor = r?.symbol?.color || "#ccc";
-      }
+      simbolo.style.backgroundColor = r?.symbol?.color || "#ccc";
 
       const nomeTexto = document.createElement("span");
       nomeTexto.textContent = nome;
-      nomeTexto.style.whiteSpace = "nowrap";
-
       label.appendChild(checkbox);
       label.appendChild(simbolo);
       label.appendChild(nomeTexto);
       conteudo.appendChild(label);
-
-      // Subitens apenas para Trilhas (nomes individuais)
-      if (nome === "Trilhas" && layer.renderer?.type === "unique-value") {
-        const sub = document.createElement("div");
-        sub.style.margin = "6px 0 6px 28px";
-        sub.style.maxHeight = "150px";
-        sub.style.overflowY = "auto";
-        
-        layer.renderer.uniqueValueInfos.forEach(info => {
-          const row = document.createElement("div");
-          row.style.display = "flex";
-          row.style.alignItems = "center";
-          row.style.marginBottom = "4px";
-
-          const sw = document.createElement("span");
-          sw.style.display = "inline-block";
-          sw.style.width = "22px";
-          sw.style.height = "10px";
-          sw.style.marginRight = "8px";
-          sw.style.border = "1px solid #666";
-          sw.style.borderRadius = "2px";
-          sw.style.backgroundColor = info.symbol.color;
-
-          const txt = document.createElement("span");
-          txt.textContent = info.label;
-
-          row.appendChild(sw);
-          row.appendChild(txt);
-          sub.appendChild(row);
-        });
-        conteudo.appendChild(sub);
-      }
     });
   }
 
-  // Monta conteúdo inicial
   rebuildLegendContent();
 
-  // Listener ÚNICO de toggle
   header.addEventListener("click", () => {
     const aberto = conteudo.style.display === "block";
     conteudo.style.display = aberto ? "none" : "block";
     header.textContent = aberto ? "Legenda ▼" : "Legenda ▲";
   });
 
-  // Anexa UMA VEZ e adiciona à UI UMA VEZ
   painel.appendChild(header);
   painel.appendChild(conteudo);
   view.ui.add(painel, "top-right");
 
-  // Torna o painel arrastável
-  (function makeDraggable(el, handle) {
-    let sx=0, sy=0, ox=0, oy=0, dragging=false;
-    handle.style.userSelect = "none";
-    handle.style.touchAction = "none";
-    handle.addEventListener("mousedown", start);
-    handle.addEventListener("touchstart", start, {passive:true});
-    
-    function start(e){
-      dragging = true;
-      const pt = ("touches" in e) ? e.touches[0] : e;
-      sx = pt.clientX; sy = pt.clientY;
-      const rect = el.getBoundingClientRect();
-      ox = rect.left; oy = rect.top;
-      document.addEventListener("mousemove", move);
-      document.addEventListener("mouseup", end);
-      document.addEventListener("touchmove", move, {passive:false});
-      document.addEventListener("touchend", end);
-    }
-    function move(e){
-      if(!dragging) return;
-      if ("preventDefault" in e) e.preventDefault();
-      const pt = ("touches" in e) ? e.touches[0] : e;
-      const dx = pt.clientX - sx;
-      const dy = pt.clientY - sy;
-      const vw = window.innerWidth, vh = window.innerHeight;
-      let left = ox + dx, top = oy + dy;
-      left = Math.max(0, Math.min(left, vw - el.offsetWidth));
-      top  = Math.max(0, Math.min(top, vh - el.offsetHeight));
-      el.style.left = left + "px";
-      el.style.top  = top  + "px";
-      el.style.right = "auto";
-      el.style.transform = "none";
-    }
-    function end(){
-      dragging = false;
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", end);
-      document.removeEventListener("touchmove", move);
-      document.removeEventListener("touchend", end);
-    }
-  })(painel, header);
-
-  // ---- PROCESSAMENTO DAS CAMADAS ----
+  // ---- CAMADAS ----
   camadas.forEach(cfg => {
     let renderer;
 
@@ -295,19 +218,12 @@ require([
         q.returnGeometry = false;
         q.outFields = ["Nome"];
         const { features } = await trilhasLayer.queryFeatures(q);
-
-        const uniq = [];
-        for (const f of features) {
-          const v = f.attributes.Nome;
-          if (v != null && !uniq.includes(v)) uniq.push(v);
-        }
-
+        const uniq = [...new Set(features.map(f => f.attributes.Nome))];
         renderer.uniqueValueInfos = uniq.map((v, i) => ({
           value: v,
           label: v,
           symbol: { type: "simple-line", color: palette[i % palette.length], width: 2.5 }
         }));
-
         trilhasLayer.renderer = renderer;
         rebuildLegendContent();
       });
@@ -317,7 +233,6 @@ require([
       return;
     }
 
-    // Demais camadas
     const simbologia = cfg.tipo === "polygon"
       ? {
           type: "simple",
@@ -339,5 +254,4 @@ require([
     map.add(layer);
     layersDict[cfg.nome] = layer;
   });
-
 });
