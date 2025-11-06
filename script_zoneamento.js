@@ -65,21 +65,11 @@ require([
   const layersDict = {};
 
   // ---- PALETAS DE CORES ----
-  const paletteImovel = ["#90caf9","#64b5f6","#42a5f5","#1e88e5","#1565c0"];
-  const paletteRppn   = ["#81c784","#66bb6a","#4caf50","#43a047","#2e7d32"];
   const paletteAreas  = ["#ce93d8","#ba68c8","#ab47bc","#9c27b0","#8e24aa"];
   const paletteTrilhas = [
-  "#fff176", // amarelo claro
-  "#ffb74d", // laranja médio
-  "#fb8c00", // laranja forte
-  "#f4511e", // laranja-avermelhado
-  "#e64a19", // vermelho queimado
-  "#d84315", // vermelho escuro
-  "#bf360c", // marrom-avermelhado escuro
-  "#ff9800", // laranja vivo
-  "#ffcc80", // bege-laranja suave
-  "#ff6f00"  // laranja intenso
-];
+    "#fff176","#ffb74d","#fb8c00","#f4511e","#e64a19",
+    "#d84315","#bf360c","#ff9800","#ffcc80","#ff6f00"
+  ];
 
   // ---- FUNÇÃO DE CONVERSÃO HEX → RGBA ----
   function hexToRgba(hex, alpha = 1.0) {
@@ -127,6 +117,41 @@ require([
   painel.appendChild(conteudo);
   view.ui.add(painel, "top-right");
 
+  // ---- COMPORTAMENTO RESPONSIVO ----
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+  if (isMobile) {
+    painel.style.position = "fixed";
+    painel.style.left = "0";
+    painel.style.right = "0";
+    painel.style.bottom = "0";
+    painel.style.top = "auto";
+    painel.style.margin = "0";
+    painel.style.width = "100vw";
+    painel.style.maxHeight = "50vh";
+    painel.style.overflowY = "auto";
+    painel.style.borderRadius = "12px 12px 0 0";
+    painel.style.zIndex = "9999";
+    painel.style.display = "block";
+    painel.style.opacity = "1";
+
+    // inicia recolhida
+    conteudo.style.display = "none";
+    header.textContent = "Legenda ▼";
+
+    setTimeout(() => {
+      painel.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 400);
+  } else {
+    painel.style.position = "absolute";
+    painel.style.top = "70px";
+    painel.style.right = "10px";
+    painel.style.width = "260px";
+    painel.style.maxHeight = "calc(100vh - 100px)";
+    painel.style.overflowY = "auto";
+  }
+
+  // ---- FUNÇÃO DE RECONSTRUÇÃO DA LEGENDA ----
   function rebuildLegendContent() {
     conteudo.innerHTML = "";
     Object.entries(layersDict).forEach(([nome, layer]) => {
@@ -200,12 +225,7 @@ require([
     // Zoneamento do Imóvel
     if (nome === "Zoneamento do Imóvel") {
       renderer = new UniqueValueRenderer({ field: "Zoneamento" });
-      const layer = new GeoJSONLayer({
-        url: cfg.url,
-        title: nome,
-        popupTemplate: popups[nome],
-        renderer
-      });
+      const layer = new GeoJSONLayer({ url: cfg.url, title: nome, popupTemplate: popups[nome], renderer });
 
       layer.when(async () => {
         const { features } = await layer.queryFeatures({ returnGeometry: false, outFields: ["Zoneamento"] });
@@ -213,22 +233,12 @@ require([
 
         renderer.uniqueValueInfos = uniq.map(v => {
           let fillColor;
-
-          // Define cor com base no nome da zona
           switch (v.toLowerCase()) {
-            case "zona roxa":
-              fillColor = [156, 39, 176, 0.45]; // Roxa
-              break;
-            case "zona laranja":
-              fillColor = [251, 140, 0, 0.45]; // Laranja
-              break;
-            case "zona verde":
-              fillColor = [0, 128, 128, 0.45]; // Verde-azulado forte (#008080)
-              break;
-            default:
-              fillColor = [96, 125, 139, 0.4]; // fallback (cinza-azulado)
+            case "zona roxa": fillColor = [156, 39, 176, 0.45]; break;
+            case "zona laranja": fillColor = [251, 140, 0, 0.45]; break;
+            case "zona verde": fillColor = [0, 128, 128, 0.45]; break;
+            default: fillColor = [96, 125, 139, 0.4];
           }
-
           return {
             value: v,
             label: v,
@@ -239,52 +249,30 @@ require([
             }
           };
         });
-
         layer.renderer = renderer;
         rebuildLegendContent();
       });
-
       map.add(layer);
       layersDict[nome] = layer;
       return;
     }
 
-
     // Zoneamento da RPPN
     if (nome === "Zoneamento da RPPN") {
       renderer = new UniqueValueRenderer({ field: "Zona" });
-      const layer = new GeoJSONLayer({
-        url: cfg.url,
-        title: nome,
-        popupTemplate: popups[nome],
-        renderer
-      });
+      const layer = new GeoJSONLayer({ url: cfg.url, title: nome, popupTemplate: popups[nome], renderer });
 
       layer.when(async () => {
-        const { features } = await layer.queryFeatures({
-          returnGeometry: false,
-          outFields: ["Zona"]
-        });
+        const { features } = await layer.queryFeatures({ returnGeometry: false, outFields: ["Zona"] });
         const uniq = [...new Set(features.map(f => f.attributes.Zona))];
 
         renderer.uniqueValueInfos = uniq.map(v => {
           let fillColor;
-
-          // Define cores mais contrastantes e naturais por nome de zona
           switch (v.toLowerCase()) {
-            case "zona de preservação":
-              // Verde musgo claro e opaco — levemente amarelado
-              fillColor = [107, 142, 35, 0.25]; // #6B8E23
-              break;
-            case "zona de conservação":
-              // Verde oliva escuro e bem apagado
-              fillColor = [47, 79, 47, 0.35]; // #2F4F2F
-              break;
-            default:
-              // fallback verde acinzentado neutro
-              fillColor = [120, 150, 120, 0.25]; // #789678
+            case "zona de preservação": fillColor = [107, 142, 35, 0.25]; break;
+            case "zona de conservação": fillColor = [47, 79, 47, 0.35]; break;
+            default: fillColor = [120, 150, 120, 0.25];
           }
-
           return {
             value: v,
             label: v,
@@ -295,11 +283,9 @@ require([
             }
           };
         });
-
         layer.renderer = renderer;
         rebuildLegendContent();
       });
-
       map.add(layer);
       layersDict[nome] = layer;
       return;

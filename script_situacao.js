@@ -110,6 +110,7 @@ require([
     font-size: 14px;
     pointer-events: auto;
   `;
+
   const header = document.createElement("div");
   header.textContent = "Legenda ▲";
   header.style.cssText = `
@@ -122,19 +123,58 @@ require([
     font-weight: bold;
     text-align: center;
   `;
+
   const conteudo = document.createElement("div");
   conteudo.style.cssText = `padding: 10px 14px; display: block;`;
+
+  // Alterna abertura e fechamento da legenda
   header.addEventListener("click", () => {
     const aberto = conteudo.style.display === "block";
     conteudo.style.display = aberto ? "none" : "block";
     header.textContent = aberto ? "Legenda ▼" : "Legenda ▲";
   });
+
   painel.appendChild(header);
   painel.appendChild(conteudo);
   view.ui.add(painel, "top-right");
 
+  // --- COMPORTAMENTO RESPONSIVO ---
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+  if (isMobile) {
+    // Versão mobile: legenda fixa no rodapé
+    painel.style.position = "fixed";
+    painel.style.left = "0";
+    painel.style.right = "0";
+    painel.style.bottom = "0";
+    painel.style.top = "auto";
+    painel.style.margin = "0";
+    painel.style.width = "100vw";
+    painel.style.maxHeight = "50vh";
+    painel.style.overflowY = "auto";
+    painel.style.borderRadius = "12px 12px 0 0";
+    painel.style.zIndex = "9999";
+    painel.style.display = "block";
+    painel.style.opacity = "1";
+
+    // Pequeno delay pra não interferir com o carregamento do mapa
+    setTimeout(() => {
+      painel.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 400);
+  } else {
+    // Versão desktop: canto superior direito
+    painel.style.position = "absolute";
+    painel.style.top = "70px";
+    painel.style.right = "10px";
+    painel.style.width = "260px";
+    painel.style.maxHeight = "calc(100vh - 100px)";
+    painel.style.overflowY = "auto";
+  }
+
+  // ---- FUNÇÃO DE RECONSTRUÇÃO DE LEGENDA ----
   function rebuildLegendContent() {
     conteudo.innerHTML = "";
+
     Object.entries(layersDict).forEach(([nome, layer]) => {
       const label = document.createElement("label");
       label.style.display = "flex";
@@ -167,6 +207,7 @@ require([
     });
   }
 
+  // ---- CRIAÇÃO DAS CAMADAS ----
   camadas.forEach(cfg => {
     const simbologia = cfg.tipo === "polygon"
       ? {
