@@ -299,22 +299,35 @@ require([
       layer.when(async () => {
         const { features } = await layer.queryFeatures({ returnGeometry: false, outFields: ["Nome_Area"] });
         const uniq = [...new Set(features.map(f => f.attributes.Nome_Area))];
-        renderer.uniqueValueInfos = uniq.map((v, i) => ({
-          value: v,
-          label: v,
-          symbol: {
-            type: "simple-fill",
-            color: hexToRgba(paletteAreas[i % paletteAreas.length], 0.4),
-            outline: { color: "#4a148c", width: 1.2 }
-          }
-        }));
+
+        // Cores fixas por nome de área
+        const colorMap = {
+          "Área de Visitação": [173, 255, 47, 0.55],   // verde marca-texto (#ADFF2F)
+          "Área de Recuperação": [255, 99, 71, 0.55], // vermelho suave (#FF6347)
+        };
+
+        renderer.uniqueValueInfos = uniq.map(v => {
+          const cor = colorMap[v] || [100, 149, 237, 0.45]; // fallback azul (#6495ED)
+          return {
+            value: v,
+            label: v,
+            symbol: {
+              type: "simple-fill",
+              color: cor,
+              outline: { color: "#000000", width: 1.1 }
+            }
+          };
+        });
+
         layer.renderer = renderer;
         rebuildLegendContent();
       });
+
       map.add(layer);
       layersDict[nome] = layer;
       return;
     }
+
 
     // Trilhas
     if (nome === "Trilhas") {
