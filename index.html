@@ -3,28 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mapa de Teresópolis - Imagens Esri</title>
-  <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+  <title>Portal da RPPN Recanto das Pedras</title>
   <link rel="stylesheet" href="estilo.css">
-  <script src="https://js.arcgis.com/4.29/"></script>
+  <style>
+    /* Botão pequeno fixo no canto superior direito */
+    .download-top-btn {
+      position: fixed;
+      top: 15px;
+      right: 20px;
+      background-color: #0079c1;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 5px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: background 0.3s ease;
+      z-index: 1000;
+    }
+
+    .download-top-btn:hover {
+      background-color: #005f99;
+    }
+
+    .download-top-btn::before {
+      content: "📄 ";
+    }
+  </style>
 </head>
-<body>
-  <header>
-    <h1>WebMap RPPN Recanto da Pedras</h1>
-    <select id="basemapSelect">
-      <option value="satellite">Satélite (Esri)</option>
-      <option value="hybrid">Satélite + Rotas</option>
-      <option value="topo-vector">Topográfico</option>
-    </select>
-  </header>
+<body class="menu-body">
 
-  <div id="viewDiv"></div>
+  <!-- 🔽 Botão fixo no topo direito -->
+  <a 
+    href="https://drive.google.com/uc?export=download&id=1ignkqNeZ1elgwmYrby8gNusltwCp3kDU"
+    class="download-top-btn"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Download do Plano de Manejo
+  </a>
 
-  <script src="script.js"></script>
+  <div class="menu-container">
+    <h1>Portal da RPPN Recanto das Pedras</h1>
+    <img src="imagem/rppn_foto.png" alt="Imagem da RPPN Recanto das Pedras" class="rppn-img">
 
-  <!-- Imagem fixa na parte inferior -->
-<div id="rodape-imagem">
-  <img src="imagem/Equipe Geo_simples_semfundo.png" alt="Logo Equipe GEO" />
-</div>
+    <div class="menu-buttons">
+      <a href="situacao.html" class="menu-btn">Mapa de Situação da RPPN Recanto das Pedras</a>
+      <a href="zoneamento.html" class="menu-btn">Mapa de Zoneamento da RPPN Recanto das Pedras</a>
+    </div>
+  </div>
+
+  <footer class="menu-footer">
+    <img src="imagem/Equipe Geo_simples_semfundo.png" alt="Logo Equipe GEO">
+  </footer>
+
 </body>
 </html>

@@ -46,19 +46,6 @@ html, body, #viewDiv {
   overflow-y: auto;
 }
 
-/* --- Rodapé com logo --- */
-#rodape-imagem {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  z-index: 1000;
-}
-
-#rodape-imagem img {
-  height: 50px;
-  opacity: 0.9;
-}
-
 /* --- Modo Mobile --- */
 @media (max-width: 768px) {
   #painelLegenda {
@@ -101,65 +88,4 @@ html, body, #viewDiv {
   #painelLegenda .conteudo {
     max-height: 65vh;
   }
-}
-
-/* --- PÁGINA DE MENU (PORTAL INICIAL) --- */
-.menu-body {
-  background: linear-gradient(135deg, #005f73, #0a9396);
-  color: #fff;
-  text-align: center;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0;
-}
-
-.menu-container {
-  padding-top: 60px;
-}
-
-.menu-container h1 {
-  font-size: 2em;
-  margin-bottom: 30px;
-  text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-}
-
-.rppn-img {
-  width: 80%;
-  max-width: 800px;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-  margin-bottom: 40px;
-}
-
-.menu-buttons {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.menu-btn {
-  background-color: #94d2bd;
-  color: #001219;
-  text-decoration: none;
-  padding: 15px 25px;
-  border-radius: 10px;
-  font-weight: bold;
-  font-size: 1em;
-  transition: all 0.3s;
-}
-
-.menu-btn:hover {
-  background-color: #ee9b00;
-  transform: scale(1.05);
-}
-
-.menu-footer img {
-  width: 200px;
-  margin: 20px auto;
-  display: block;
-  opacity: 0.9;
 }

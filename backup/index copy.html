@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa de Teresópolis - Imagens Esri</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+  <link rel="stylesheet" href="estilo.css">
+  <script src="https://js.arcgis.com/4.29/"></script>
+</head>
+<body>
+  <header>
+    <h1>WebMap RPPN Recanto da Pedras</h1>
+    <select id="basemapSelect">
+      <option value="satellite">Satélite (Esri)</option>
+      <option value="hybrid">Satélite + Rotas</option>
+      <option value="topo-vector">Topográfico</option>
+    </select>
+  </header>
+
+  <div id="viewDiv"></div>
+
+  <script src="script.js"></script>
+
+  <!-- Imagem fixa na parte inferior -->
+<div id="rodape-imagem">
+  <img src="imagem/Equipe Geo_simples_semfundo.png" alt="Logo Equipe GEO" />
+</div>
+</body>
+</html>
