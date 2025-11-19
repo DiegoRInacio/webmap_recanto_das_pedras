@@ -176,32 +176,53 @@ require([
     conteudo.innerHTML = "";
 
     Object.entries(layersDict).forEach(([nome, layer]) => {
-      const label = document.createElement("label");
+
+      const symbol = layer.legendaSimbolo;
+      if (!symbol) return;
+
+      const label = document.createElement("div");
       label.style.display = "flex";
       label.style.alignItems = "center";
-      label.style.marginBottom = "6px";
+      label.style.marginBottom = "8px";
 
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.checked = layer.visible ?? true;
       checkbox.style.marginRight = "8px";
       checkbox.addEventListener("change", e => (layer.visible = e.target.checked));
+      label.appendChild(checkbox);
 
-      const simbolo = document.createElement("span");
-      simbolo.style.display = "inline-block";
-      simbolo.style.width = "22px";
-      simbolo.style.height = "12px";
+      const simbolo = document.createElement("div");
+      simbolo.style.width = "28px";
+      simbolo.style.height = "18px";
       simbolo.style.marginRight = "8px";
-      simbolo.style.border = "1px solid #666";
-      simbolo.style.borderRadius = "2px";
-      simbolo.style.backgroundColor = layer.renderer?.symbol?.color || "#ccc";
+      simbolo.style.borderRadius = "3px";
+
+      // POLÍGONO
+      if (symbol.type === "simple-fill") {
+        const fill = symbol.color;
+        const out = symbol.outline;
+
+        simbolo.style.backgroundColor =
+          `rgba(${fill[0]}, ${fill[1]}, ${fill[2]}, ${fill[3]})`;
+
+        simbolo.style.border =
+          `${out.width}px solid ${out.color}`;
+      }
+
+      // LINHA
+      if (symbol.type === "simple-line") {
+        simbolo.style.background = symbol.color;
+        simbolo.style.height = `${Math.max(3, symbol.width * 2)}px`;
+        simbolo.style.border = "none";
+      }
+
+      label.appendChild(simbolo);
 
       const nomeTexto = document.createElement("span");
       nomeTexto.textContent = nome;
       nomeTexto.style.whiteSpace = "nowrap";
 
-      label.appendChild(checkbox);
-      label.appendChild(simbolo);
       label.appendChild(nomeTexto);
       conteudo.appendChild(label);
     });
@@ -226,6 +247,9 @@ require([
       popupTemplate: popups[cfg.nome],
       renderer: simbologia
     });
+
+    // Guarda a simbologia para a legenda
+    layer.legendaSimbolo = simbologia.symbol;
 
     map.add(layer);
     layersDict[cfg.nome] = layer;
