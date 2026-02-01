@@ -69,8 +69,8 @@ require([
   const paletteAreas  = ["#ce93d8","#ba68c8","#ab47bc","#9c27b0","#8e24aa"];
   // Cores vibrantes com bom contraste - vermelho, laranja e amarelo
   const paletteTrilhas = [
-    "#FF0000", "#FF4500", "#FFD700",  // vermelho puro, laranja-avermelhado, dourado
-    "#FF1493", "#FF6347", "#FFA500"   // pink forte, tomate, laranja
+    "#FFD700", "#FF0000", "#FF4500",   // vermelho puro, laranja-avermelhado, dourado
+    "#FFA500", "#FF1493", "#FF6347"    // pink forte, tomate, laranja
   ];
 
   // ---- FUNÇÃO DE CONVERSÃO HEX → RGBA ----
