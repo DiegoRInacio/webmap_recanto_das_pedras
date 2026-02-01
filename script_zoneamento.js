@@ -331,12 +331,12 @@ require([
 
     // Trilhas
     if (nome === "Trilhas") {
-      renderer = new UniqueValueRenderer({ field: "Nome" });
+      renderer = new UniqueValueRenderer({ field: "classificacao" });
       const layer = new GeoJSONLayer({ url: cfg.url, title: nome, popupTemplate: popups[nome], renderer });
 
       layer.when(async () => {
-        const { features } = await layer.queryFeatures({ returnGeometry: false, outFields: ["Nome"] });
-        const uniq = [...new Set(features.map(f => f.attributes.Nome))];
+        const { features } = await layer.queryFeatures({ returnGeometry: false, outFields: ["classificacao"] });
+        const uniq = [...new Set(features.map(f => f.attributes.classificacao))];
         renderer.uniqueValueInfos = uniq.map((v, i) => ({
           value: v,
           label: v,
