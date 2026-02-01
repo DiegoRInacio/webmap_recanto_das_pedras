@@ -67,8 +67,8 @@ require([
   // ---- PALETAS DE CORES ----
   const paletteAreas  = ["#ce93d8","#ba68c8","#ab47bc","#9c27b0","#8e24aa"];
   const paletteTrilhas = [
-    "#fff176","#ffb74d","#fb8c00","#f4511e","#e64a19",
-    "#d84315","#bf360c","#ff9800","#ffcc80","#ff6f00"
+    "#ff1744", "#d32f2f", "#c62828", "#b71c1c", "#e53935",
+    "#f44336", "#ef5350", "#e57373", "#ff5252", "#ff6e40"
   ];
 
   // ---- FUNÇÃO DE CONVERSÃO HEX → RGBA ----
@@ -173,7 +173,14 @@ require([
       simbolo.style.marginRight = "8px";
       simbolo.style.border = "1px solid #666";
       simbolo.style.borderRadius = "2px";
-      simbolo.style.backgroundColor = layer.renderer?.symbol?.color || "#ccc";
+      
+      // Para trilhas, não mostrar símbolo de preenchimento
+      if (nome !== "Trilhas") {
+        simbolo.style.backgroundColor = layer.renderer?.symbol?.color || "#ccc";
+      } else {
+        simbolo.style.border = "none";
+        simbolo.style.background = "transparent";
+      }
 
       const nomeTexto = document.createElement("span");
       nomeTexto.textContent = nome;
@@ -201,9 +208,17 @@ require([
           sw.style.width = "22px";
           sw.style.height = "10px";
           sw.style.marginRight = "8px";
-          sw.style.border = "1px solid #666";
-          sw.style.borderRadius = "2px";
-          sw.style.backgroundColor = info.symbol.color;
+          
+          // Para trilhas, criar linha tracejada
+          if (nome === "Trilhas") {
+            sw.style.border = "none";
+            sw.style.borderTop = `2px dashed ${info.symbol.color}`;
+            sw.style.backgroundColor = "transparent";
+          } else {
+            sw.style.border = "1px solid #666";
+            sw.style.borderRadius = "2px";
+            sw.style.backgroundColor = info.symbol.color;
+          }
 
           const txt = document.createElement("span");
           txt.textContent = info.label;
@@ -343,7 +358,8 @@ require([
           symbol: {
             type: "simple-line",
             color: hexToRgba(paletteTrilhas[i % paletteTrilhas.length], 0.9),
-            width: 1.8
+            width: 2.5,
+            style: "dash"
           }
         }));
         layer.renderer = renderer;
