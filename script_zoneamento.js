@@ -66,9 +66,10 @@ require([
 
   // ---- PALETAS DE CORES ----
   const paletteAreas  = ["#ce93d8","#ba68c8","#ab47bc","#9c27b0","#8e24aa"];
+  // Cores vibrantes com bom contraste - vermelho, laranja e amarelo
   const paletteTrilhas = [
-    "#ff1744", "#d32f2f", "#c62828", "#b71c1c", "#e53935",
-    "#f44336", "#ef5350", "#e57373", "#ff5252", "#ff6e40"
+    "#FF0000", "#FF4500", "#FFD700",  // vermelho puro, laranja-avermelhado, dourado
+    "#FF1493", "#FF6347", "#FFA500"   // pink forte, tomate, laranja
   ];
 
   // ---- FUNÇÃO DE CONVERSÃO HEX → RGBA ----
@@ -209,10 +210,10 @@ require([
           sw.style.height = "10px";
           sw.style.marginRight = "8px";
           
-          // Para trilhas, criar linha tracejada
+          // Para trilhas, criar linha tracejada mais grossa
           if (nome === "Trilhas") {
             sw.style.border = "none";
-            sw.style.borderTop = `2px dashed ${info.symbol.color}`;
+            sw.style.borderTop = `3px dashed ${info.symbol.color}`;
             sw.style.backgroundColor = "transparent";
           } else {
             sw.style.border = "1px solid #666";
@@ -344,7 +345,7 @@ require([
     }
 
 
-    // Trilhas
+    // Trilhas - COM CONTORNO BRANCO PARA CONTRASTE
     if (nome === "Trilhas") {
       renderer = new UniqueValueRenderer({ field: "classificacao" });
       const layer = new GeoJSONLayer({ url: cfg.url, title: nome, popupTemplate: popups[nome], renderer });
@@ -357,9 +358,14 @@ require([
           label: v,
           symbol: {
             type: "simple-line",
-            color: hexToRgba(paletteTrilhas[i % paletteTrilhas.length], 0.9),
-            width: 2.5,
-            style: "dash"
+            color: hexToRgba(paletteTrilhas[i % paletteTrilhas.length], 1.0),
+            width: 4,  // linha mais grossa
+            style: "dash",
+            // Adiciona um "halo" branco ao redor da linha para dar contraste
+            outline: {
+              color: [255, 255, 255, 0.8],  // branco semi-transparente
+              width: 1.5
+            }
           }
         }));
         layer.renderer = renderer;
