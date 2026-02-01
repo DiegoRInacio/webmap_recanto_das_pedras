@@ -49,6 +49,7 @@ require([
       content: [{ type: "fields", fieldInfos: [
         { fieldName: "Nome", label: "Nome da Trilha" },
         { fieldName: "extensao", label: "Extensão (m)" },
+        { fieldName: "classificacao", label: "Classificação" },
         { fieldName: "id", label: "ID" }
       ]}]
     }
