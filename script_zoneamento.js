@@ -68,9 +68,15 @@ require([
   // ---- PALETAS DE CORES ----
   const paletteAreas  = ["#ce93d8","#ba68c8","#ab47bc","#9c27b0","#8e24aa"];
   // Cores vibrantes com bom contraste - vermelho, laranja e amarelo
+  // const paletteTrilhas = [
+  //   "#FF4500", "#FFD700", "#FF0000",   // dourado, laranja-avermelhado, vermelho puro
+  //   "#FF6347", "#FFA500", "#FF1493"    // laranja, tomate, pink forte 
+  // ];
+
   const paletteTrilhas = [
-    "#FF4500", "#FFD700", "#FF0000",   // dourado, laranja-avermelhado, vermelho puro
-    "#FF6347", "#FFA500", "#FF1493"    // laranja, tomate, pink forte 
+    "#FFFFFF",  // Baixa dificuldade - branco 🔲
+    "#D2B48C",  // Média dificuldade - bege 🟫
+    "#722F37"   // Alta dificuldade - vinho escuro 🍷
   ];
 
   // ---- FUNÇÃO DE CONVERSÃO HEX → RGBA ----
