@@ -211,10 +211,10 @@ require([
           sw.style.height = "10px";
           sw.style.marginRight = "8px";
           
-          // Para trilhas, criar linha tracejada mais grossa
+          // Para trilhas, criar linha contínua mais fina
           if (nome === "Trilhas") {
             sw.style.border = "none";
-            sw.style.borderTop = `3px dashed ${info.symbol.color}`;
+            sw.style.borderTop = `2px solid ${info.symbol.color}`;
             sw.style.backgroundColor = "transparent";
           } else {
             sw.style.border = "1px solid #666";
@@ -346,7 +346,7 @@ require([
     }
 
 
-    // Trilhas - COM CONTORNO BRANCO PARA CONTRASTE
+    // Trilhas - LINHA CONTÍNUA E MAIS FINA
     if (nome === "Trilhas") {
       renderer = new UniqueValueRenderer({ field: "classificacao" });
       const layer = new GeoJSONLayer({ url: cfg.url, title: nome, popupTemplate: popups[nome], renderer });
@@ -354,19 +354,23 @@ require([
       layer.when(async () => {
         const { features } = await layer.queryFeatures({ returnGeometry: false, outFields: ["classificacao"] });
         const uniq = [...new Set(features.map(f => f.attributes.classificacao))];
-        renderer.uniqueValueInfos = uniq.map((v, i) => ({
+        
+        // Define a ordem desejada
+        const ordemDesejada = ["Baixa dificuldade", "Média dificuldade", "Alta dificuldade"];
+        const uniqOrdenado = uniq.sort((a, b) => {
+          const indexA = ordemDesejada.indexOf(a);
+          const indexB = ordemDesejada.indexOf(b);
+          return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+        });
+
+        renderer.uniqueValueInfos = uniqOrdenado.map((v, i) => ({
           value: v,
           label: v,
           symbol: {
             type: "simple-line",
             color: hexToRgba(paletteTrilhas[i % paletteTrilhas.length], 1.0),
-            width: 4,  // linha mais grossa
-            style: "dash",
-            // Adiciona um "halo" branco ao redor da linha para dar contraste
-            outline: {
-              color: [255, 255, 255, 0.8],  // branco semi-transparente
-              width: 1.5
-            }
+            width: 2.5,  // linha mais fina
+            style: "solid"  // linha contínua
           }
         }));
         layer.renderer = renderer;
