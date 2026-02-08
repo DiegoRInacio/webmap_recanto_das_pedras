@@ -2,8 +2,10 @@ require([
   "esri/Map",
   "esri/views/MapView",
   "esri/layers/GeoJSONLayer",
-  "esri/Graphic"
-], function (Map, MapView, GeoJSONLayer, Graphic) {
+  "esri/Graphic",
+  "esri/layers/WebTileLayer",
+  "esri/Basemap"
+], function (Map, MapView, GeoJSONLayer, Graphic, WebTileLayer, Basemap) {
 
   // ---- MAPA BASE ----
   const map = new Map({ basemap: "hybrid" });
@@ -15,16 +17,52 @@ require([
     zoom: 14
   });
 
-  // ---- MENU DE BASEMAP EXISTENTE ----
+  // ---- MENU DE BASEMAP COM GOOGLE MAPS ----
   const basemapSelect = document.getElementById("basemapSelect");
-  basemapSelect.addEventListener("change", () => (map.basemap = basemapSelect.value));
+  basemapSelect.addEventListener("change", () => {
+    const valor = basemapSelect.value;
+    
+    // Se for basemap do Esri, usa diretamente
+    if (valor === "satellite" || valor === "hybrid" || valor === "topo-vector") {
+      map.basemap = valor;
+    } 
+    // Se for Google Maps, cria WebTileLayer customizado
+    else if (valor.startsWith("google-")) {
+      let urlTemplate;
+      
+      switch(valor) {
+        case "google-satelite":
+          urlTemplate = "https://mt1.google.com/vt/lyrs=s&x={col}&y={row}&z={level}";
+          break;
+        case "google-hybrid":
+          urlTemplate = "https://mt1.google.com/vt/lyrs=y&x={col}&y={row}&z={level}";
+          break;
+        case "google-streets":
+          urlTemplate = "https://mt1.google.com/vt/lyrs=m&x={col}&y={row}&z={level}";
+          break;
+      }
+      
+      const googleLayer = new WebTileLayer({
+        urlTemplate: urlTemplate,
+        copyright: "© Google Maps"
+      });
+      
+      const googleBasemap = new Basemap({
+        baseLayers: [googleLayer],
+        title: "Google Maps",
+        id: "google-basemap"
+      });
+      
+      map.basemap = googleBasemap;
+    }
+  });
 
   // ---- BOTÃO DE ROTA (ajustado abaixo do zoom) ----
   const routeButton = document.createElement("button");
   routeButton.textContent = "🚗 Traçar rota";
   routeButton.style.cssText = `
     position: absolute;
-    top: 160px;          /* ajustado para ficar abaixo do zoom */
+    top: 160px;
     left: 15px;
     z-index: 9999;
     background: #0079c1;

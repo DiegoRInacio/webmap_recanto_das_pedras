@@ -2,8 +2,10 @@ require([
   "esri/Map",
   "esri/views/MapView",
   "esri/layers/GeoJSONLayer",
-  "esri/renderers/UniqueValueRenderer"
-], function (Map, MapView, GeoJSONLayer, UniqueValueRenderer) {
+  "esri/renderers/UniqueValueRenderer",
+  "esri/layers/WebTileLayer",
+  "esri/Basemap"
+], function (Map, MapView, GeoJSONLayer, UniqueValueRenderer, WebTileLayer, Basemap) {
 
   // ---- MAPA BASE ----
   const map = new Map({ basemap: "hybrid" });
@@ -15,9 +17,42 @@ require([
     zoom: 14
   });
 
-  // ---- TROCA DE BASEMAP ----
+  // ---- TROCA DE BASEMAP COM GOOGLE MAPS ----
   const select = document.getElementById("basemapSelect");
-  select.addEventListener("change", () => (map.basemap = select.value));
+  select.addEventListener("change", () => {
+    const valor = select.value;
+    
+    // Se for basemap do Esri, usa diretamente
+    if (valor === "satellite" || valor === "hybrid" || valor === "topo-vector") {
+      map.basemap = valor;
+    } 
+    // Se for Google Maps, cria WebTileLayer customizado
+    else if (valor.startsWith("google-")) {
+      let urlTemplate;
+      
+      switch(valor) {
+        case "google-satelite":
+          urlTemplate = "https://mt1.google.com/vt/lyrs=s&x={col}&y={row}&z={level}";
+          break;
+        case "google-streets":
+          urlTemplate = "https://mt1.google.com/vt/lyrs=m&x={col}&y={row}&z={level}";
+          break;
+      }
+      
+      const googleLayer = new WebTileLayer({
+        urlTemplate: urlTemplate,
+        copyright: "© Google Maps"
+      });
+      
+      const googleBasemap = new Basemap({
+        baseLayers: [googleLayer],
+        title: "Google Maps",
+        id: "google-basemap"
+      });
+      
+      map.basemap = googleBasemap;
+    }
+  });
 
   // ---- POPUPS ----
   const popups = {
