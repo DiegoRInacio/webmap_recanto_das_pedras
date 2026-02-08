@@ -369,7 +369,7 @@ require([
           symbol: {
             type: "simple-line",
             color: hexToRgba(paletteTrilhas[i % paletteTrilhas.length], 1.0),
-            width: 2.5,  // linha mais fina
+            width: 1.5,  // linha mais fina
             style: "solid"  // linha contínua
           }
         }));
