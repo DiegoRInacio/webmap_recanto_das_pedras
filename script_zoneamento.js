@@ -74,9 +74,9 @@ require([
   // ];
 
   const paletteTrilhas = [
-    "#FFFFFF",  // Baixa dificuldade - branco 🔲
-    "#D2B48C",  // Média dificuldade - bege 🟫
-    "#722F37"   // Alta dificuldade - vinho escuro 🍷
+    "#FFFFFF",  // Baixa dificuldade - branco
+    "#D2B48C",  // Média dificuldade - bege
+    "#722F37"   // Alta dificuldade - vinho escuro
   ];
 
   // ---- FUNÇÃO DE CONVERSÃO HEX → RGBA ----
