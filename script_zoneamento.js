@@ -217,11 +217,45 @@ require([
           sw.style.height = "10px";
           sw.style.marginRight = "8px";
           
-          // Para trilhas, criar linha contínua mais fina
+          // // Para trilhas, criar linha contínua mais fina
+          // if (nome === "Trilhas") {
+          //   sw.style.border = "none";
+          //   sw.style.borderTop = `2px solid ${info.symbol.color}`;
+          //   sw.style.backgroundColor = "transparent";
+          // } else {
+
+          // caso eu querisse manter o preenchimento para trilhas, mas com uma linha mais fina por cima, poderia fazer algo assim:
+
+          // Para trilhas, criar linha contínua com contorno preto
           if (nome === "Trilhas") {
+            // Cria um container para simular linha com contorno
             sw.style.border = "none";
-            sw.style.borderTop = `2px solid ${info.symbol.color}`;
             sw.style.backgroundColor = "transparent";
+            sw.style.position = "relative";
+            sw.style.height = "8px";
+            
+            // Linha preta (contorno)
+            const outline = document.createElement("span");
+            outline.style.position = "absolute";
+            outline.style.top = "50%";
+            outline.style.left = "0";
+            outline.style.right = "0";
+            outline.style.height = "4px";
+            outline.style.backgroundColor = "#000000";
+            outline.style.transform = "translateY(-50%)";
+            
+            // Linha colorida (por cima)
+            const innerLine = document.createElement("span");
+            innerLine.style.position = "absolute";
+            innerLine.style.top = "50%";
+            innerLine.style.left = "0";
+            innerLine.style.right = "0";
+            innerLine.style.height = "2px";
+            innerLine.style.backgroundColor = info.symbol.color;
+            innerLine.style.transform = "translateY(-50%)";
+            
+            sw.appendChild(outline);
+            sw.appendChild(innerLine);
           } else {
             sw.style.border = "1px solid #666";
             sw.style.borderRadius = "2px";
