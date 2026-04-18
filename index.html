@@ -4,62 +4,59 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portal da RPPN Recanto das Pedras</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="estilo.css">
-  <style>
-    /* Botão pequeno fixo no canto superior direito */
-    .download-top-btn {
-      position: fixed;
-      top: 15px;
-      right: 20px;
-      background-color: #0079c1;
-      color: white;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 8px 14px;
-      border-radius: 5px;
-      text-decoration: none;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: background 0.3s ease;
-      z-index: 1000;
-    }
-
-    .download-top-btn:hover {
-      background-color: #005f99;
-    }
-
-    .download-top-btn::before {
-      content: "📄 ";
-    }
-  </style>
 </head>
-<body class="menu-body">
+<body class="landing-body">
 
-  <!-- Botão fixo no topo direito -->
-  <a 
-    href="https://drive.google.com/uc?export=download&id=1ignkqNeZ1elgwmYrby8gNusltwCp3kDU"
-    class="download-top-btn"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    Download do Plano de Manejo
-  </a>
+  <main class="landing-page">
+    <header class="landing-nav">
+      <a href="index.html" class="landing-brand">
+        <span class="landing-brand-badge">RPPN</span>
+        <span class="landing-brand-text">Recanto das Pedras</span>
+      </a>
 
-  <div class="menu-container">
-    <h1>Portal da RPPN Recanto das Pedras</h1>
-    <img src="imagem/rppn_foto.png" alt="Imagem da RPPN Recanto das Pedras" class="rppn-img">
+      <nav class="landing-menu" aria-label="Navegação principal">
+        <a href="index.html" class="landing-menu-link active">Início</a>
+        <a href="situacao.html" class="landing-menu-link">Mapa Situação</a>
+        <a href="zoneamento.html" class="landing-menu-link">Mapa Zoneamento</a>
+      </nav>
 
-    <div class="menu-buttons">
-      <a href="situacao.html" class="menu-btn">Mapa de Situação da RPPN Recanto das Pedras</a>
-      <a href="zoneamento.html" class="menu-btn">Mapa de Zoneamento da RPPN Recanto das Pedras</a>
-    </div>
-  </div>
+      <a
+        href="https://drive.google.com/uc?export=download&id=1ignkqNeZ1elgwmYrby8gNusltwCp3kDU"
+        class="landing-download"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Download do Plano de Manejo
+      </a>
+    </header>
 
-  <footer class="menu-footer">
+    <section class="landing-hero">
+      <img src="imagem/rppn_foto.png" alt="Imagem da RPPN Recanto das Pedras" class="landing-hero-image">
+      <div class="landing-hero-overlay"></div>
+
+      <div class="landing-hero-content">
+        <span class="landing-kicker">Portal Geoambiental</span>
+        <h1>Portal da RPPN Recanto das Pedras</h1>
+        <p>
+          Explore os mapas temáticos da reserva com uma experiência visual mais imersiva,
+          mantendo a identidade da conservação como protagonista.
+        </p>
+
+        <div class="landing-actions">
+          <a href="situacao.html" class="landing-cta landing-cta-primary">Abrir Mapa Situação</a>
+          <a href="zoneamento.html" class="landing-cta landing-cta-secondary">Abrir Mapa Zoneamento</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="landing-footer">
     <img src="imagem/Equipe Geo_simples_semfundo.png" alt="Logo Equipe GEO">
   </footer>
 
 </body>
 </html>
-
-<!-- python -m http.server 8080 -->
-<!-- Acesse: http://localhost:8080/index.html -->
