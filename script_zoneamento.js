@@ -7,50 +7,59 @@ require([
   "esri/Basemap"
 ], function (Map, MapView, GeoJSONLayer, UniqueValueRenderer, WebTileLayer, Basemap) {
 
+  function createGoogleBasemap(tipo) {
+    let urlTemplate = "https://mt1.google.com/vt/lyrs=s&x={col}&y={row}&z={level}";
+
+    switch (tipo) {
+      case "google-streets":
+        urlTemplate = "https://mt1.google.com/vt/lyrs=m&x={col}&y={row}&z={level}";
+        break;
+      case "google-satelite":
+      default:
+        urlTemplate = "https://mt1.google.com/vt/lyrs=s&x={col}&y={row}&z={level}";
+        break;
+    }
+
+    const googleLayer = new WebTileLayer({
+      urlTemplate,
+      copyright: "© Google Maps"
+    });
+
+    return new Basemap({
+      baseLayers: [googleLayer],
+      title: "Google Maps",
+      id: `google-basemap-${tipo}`
+    });
+  }
+
   // ---- MAPA BASE ----
-  const map = new Map({ basemap: "hybrid" });
+  const map = new Map({ basemap: createGoogleBasemap("google-satelite") });
 
   const view = new MapView({
     container: "viewDiv",
     map,
     center: [-43.012915, -22.312919],
-    zoom: 14
+    zoom: 14,
+    popup: {
+      dockEnabled: window.matchMedia("(max-width: 768px)").matches,
+      dockOptions: {
+        buttonEnabled: true,
+        breakpoint: false,
+        position: "bottom-center"
+      }
+    }
   });
 
   // ---- TROCA DE BASEMAP COM GOOGLE MAPS ----
   const select = document.getElementById("basemapSelect");
+  select.value = "google-satelite";
   select.addEventListener("change", () => {
     const valor = select.value;
-    
-    // Se for basemap do Esri, usa diretamente
+
     if (valor === "satellite" || valor === "hybrid" || valor === "topo-vector") {
       map.basemap = valor;
-    } 
-    // Se for Google Maps, cria WebTileLayer customizado
-    else if (valor.startsWith("google-")) {
-      let urlTemplate;
-      
-      switch(valor) {
-        case "google-satelite":
-          urlTemplate = "https://mt1.google.com/vt/lyrs=s&x={col}&y={row}&z={level}";
-          break;
-        case "google-streets":
-          urlTemplate = "https://mt1.google.com/vt/lyrs=m&x={col}&y={row}&z={level}";
-          break;
-      }
-      
-      const googleLayer = new WebTileLayer({
-        urlTemplate: urlTemplate,
-        copyright: "© Google Maps"
-      });
-      
-      const googleBasemap = new Basemap({
-        baseLayers: [googleLayer],
-        title: "Google Maps",
-        id: "google-basemap"
-      });
-      
-      map.basemap = googleBasemap;
+    } else if (valor.startsWith("google-")) {
+      map.basemap = createGoogleBasemap(valor);
     }
   });
 
@@ -99,22 +108,8 @@ require([
   ];
 
   const layersDict = {};
+  const paletteTrilhas = ["#FFFFFF", "#D2B48C", "#722F37"];
 
-  // ---- PALETAS DE CORES ----
-  const paletteAreas  = ["#ce93d8","#ba68c8","#ab47bc","#9c27b0","#8e24aa"];
-  // Cores vibrantes com bom contraste - vermelho, laranja e amarelo
-  // const paletteTrilhas = [
-  //   "#FF4500", "#FFD700", "#FF0000",   // dourado, laranja-avermelhado, vermelho puro
-  //   "#FF6347", "#FFA500", "#FF1493"    // laranja, tomate, pink forte 
-  // ];
-
-  const paletteTrilhas = [
-    "#FFFFFF",  // Baixa dificuldade - branco
-    "#D2B48C",  // Média dificuldade - bege
-    "#722F37"   // Alta dificuldade - vinho escuro
-  ];
-
-  // ---- FUNÇÃO DE CONVERSÃO HEX → RGBA ----
   function hexToRgba(hex, alpha = 1.0) {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -148,7 +143,7 @@ require([
   `;
 
   const conteudo = document.createElement("div");
-  conteudo.style.cssText = `padding: 10px 14px; display: block;`;
+  conteudo.style.cssText = "padding: 10px 14px; display: block;";
 
   header.addEventListener("click", () => {
     const aberto = conteudo.style.display === "block";
@@ -177,14 +172,8 @@ require([
     painel.style.zIndex = "9999";
     painel.style.display = "block";
     painel.style.opacity = "1";
-
-    // inicia recolhida
     conteudo.style.display = "none";
     header.textContent = "Legenda ▼";
-
-    setTimeout(() => {
-      painel.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 400);
   } else {
     painel.style.position = "absolute";
     painel.style.top = "70px";
@@ -193,6 +182,10 @@ require([
     painel.style.maxHeight = "calc(100vh - 100px)";
     painel.style.overflowY = "auto";
   }
+
+  window.addEventListener("resize", () => {
+    view.popup.dockEnabled = window.innerWidth < 768;
+  });
 
   // ---- FUNÇÃO DE RECONSTRUÇÃO DA LEGENDA ----
   function rebuildLegendContent() {
@@ -207,7 +200,9 @@ require([
       checkbox.type = "checkbox";
       checkbox.checked = layer.visible ?? true;
       checkbox.style.marginRight = "8px";
-      checkbox.addEventListener("change", e => (layer.visible = e.target.checked));
+      checkbox.addEventListener("change", (e) => {
+        layer.visible = e.target.checked;
+      });
 
       const simbolo = document.createElement("span");
       simbolo.style.display = "inline-block";
@@ -216,8 +211,7 @@ require([
       simbolo.style.marginRight = "8px";
       simbolo.style.border = "1px solid #666";
       simbolo.style.borderRadius = "2px";
-      
-      // Para trilhas, não mostrar símbolo de preenchimento
+
       if (nome !== "Trilhas") {
         simbolo.style.backgroundColor = layer.renderer?.symbol?.color || "#ccc";
       } else {
@@ -240,7 +234,7 @@ require([
         sub.style.maxHeight = "150px";
         sub.style.overflowY = "auto";
 
-        layer.renderer.uniqueValueInfos.forEach(info => {
+        layer.renderer.uniqueValueInfos.forEach((info) => {
           const row = document.createElement("div");
           row.style.display = "flex";
           row.style.alignItems = "center";
@@ -251,25 +245,13 @@ require([
           sw.style.width = "22px";
           sw.style.height = "10px";
           sw.style.marginRight = "8px";
-          
-          // // Para trilhas, criar linha contínua mais fina
-          // if (nome === "Trilhas") {
-          //   sw.style.border = "none";
-          //   sw.style.borderTop = `2px solid ${info.symbol.color}`;
-          //   sw.style.backgroundColor = "transparent";
-          // } else {
 
-          // caso eu querisse manter o preenchimento para trilhas, mas com uma linha mais fina por cima, poderia fazer algo assim:
-
-          // Para trilhas, criar linha contínua com contorno preto
           if (nome === "Trilhas") {
-            // Cria um container para simular linha com contorno
             sw.style.border = "none";
             sw.style.backgroundColor = "transparent";
             sw.style.position = "relative";
             sw.style.height = "8px";
-            
-            // Linha preta (contorno)
+
             const outline = document.createElement("span");
             outline.style.position = "absolute";
             outline.style.top = "50%";
@@ -278,8 +260,7 @@ require([
             outline.style.height = "4px";
             outline.style.backgroundColor = "#000000";
             outline.style.transform = "translateY(-50%)";
-            
-            // Linha colorida (por cima)
+
             const innerLine = document.createElement("span");
             innerLine.style.position = "absolute";
             innerLine.style.top = "50%";
@@ -288,7 +269,7 @@ require([
             innerLine.style.height = "2px";
             innerLine.style.backgroundColor = info.symbol.color;
             innerLine.style.transform = "translateY(-50%)";
-            
+
             sw.appendChild(outline);
             sw.appendChild(innerLine);
           } else {
@@ -310,26 +291,33 @@ require([
   }
 
   // ---- CRIA CADA CAMADA ----
-  camadas.forEach(cfg => {
+  camadas.forEach((cfg) => {
     let renderer;
     const nome = cfg.nome;
 
-    // Zoneamento do Imóvel
     if (nome === "Zoneamento do Imóvel") {
       renderer = new UniqueValueRenderer({ field: "Zoneamento" });
       const layer = new GeoJSONLayer({ url: cfg.url, title: nome, popupTemplate: popups[nome], renderer });
 
       layer.when(async () => {
         const { features } = await layer.queryFeatures({ returnGeometry: false, outFields: ["Zoneamento"] });
-        const uniq = [...new Set(features.map(f => f.attributes.Zoneamento))];
+        const uniq = [...new Set(features.map((f) => f.attributes.Zoneamento))];
 
-        renderer.uniqueValueInfos = uniq.map(v => {
+        renderer.uniqueValueInfos = uniq.map((v) => {
           let fillColor;
           switch (v.toLowerCase()) {
-            case "zona roxa": fillColor = [156, 39, 176, 0.45]; break;
-            case "zona laranja": fillColor = [251, 140, 0, 0.45]; break;
-            case "zona verde": fillColor = [0, 128, 128, 0.45]; break;
-            default: fillColor = [96, 125, 139, 0.4];
+            case "zona roxa":
+              fillColor = [156, 39, 176, 0.45];
+              break;
+            case "zona laranja":
+              fillColor = [251, 140, 0, 0.45];
+              break;
+            case "zona verde":
+              fillColor = [0, 128, 128, 0.45];
+              break;
+            default:
+              fillColor = [96, 125, 139, 0.4];
+              break;
           }
           return {
             value: v,
@@ -349,21 +337,26 @@ require([
       return;
     }
 
-    // Zoneamento da RPPN
     if (nome === "Zoneamento da RPPN") {
       renderer = new UniqueValueRenderer({ field: "Zona" });
       const layer = new GeoJSONLayer({ url: cfg.url, title: nome, popupTemplate: popups[nome], renderer });
 
       layer.when(async () => {
         const { features } = await layer.queryFeatures({ returnGeometry: false, outFields: ["Zona"] });
-        const uniq = [...new Set(features.map(f => f.attributes.Zona))];
+        const uniq = [...new Set(features.map((f) => f.attributes.Zona))];
 
-        renderer.uniqueValueInfos = uniq.map(v => {
+        renderer.uniqueValueInfos = uniq.map((v) => {
           let fillColor;
           switch (v.toLowerCase()) {
-            case "zona de preservação": fillColor = [107, 142, 35, 0.25]; break;
-            case "zona de conservação": fillColor = [47, 79, 47, 0.35]; break;
-            default: fillColor = [120, 150, 120, 0.25];
+            case "zona de preservação":
+              fillColor = [107, 142, 35, 0.25];
+              break;
+            case "zona de conservação":
+              fillColor = [47, 79, 47, 0.35];
+              break;
+            default:
+              fillColor = [120, 150, 120, 0.25];
+              break;
           }
           return {
             value: v,
@@ -383,23 +376,21 @@ require([
       return;
     }
 
-    // Áreas da RPPN
     if (nome === "Áreas da RPPN") {
       renderer = new UniqueValueRenderer({ field: "Nome_Area" });
       const layer = new GeoJSONLayer({ url: cfg.url, title: nome, popupTemplate: popups[nome], renderer });
 
       layer.when(async () => {
         const { features } = await layer.queryFeatures({ returnGeometry: false, outFields: ["Nome_Area"] });
-        const uniq = [...new Set(features.map(f => f.attributes.Nome_Area))];
+        const uniq = [...new Set(features.map((f) => f.attributes.Nome_Area))];
 
-        // Cores fixas por nome de área
         const colorMap = {
-          "Área de Visitação": [173, 255, 47, 0.55],   // verde marca-texto (#ADFF2F)
-          "Área de Recuperação": [255, 99, 71, 0.55], // vermelho suave (#FF6347)
+          "Área de Visitação": [173, 255, 47, 0.55],
+          "Área de Recuperação": [255, 99, 71, 0.55]
         };
 
-        renderer.uniqueValueInfos = uniq.map(v => {
-          const cor = colorMap[v] || [100, 149, 237, 0.45]; // fallback azul (#6495ED)
+        renderer.uniqueValueInfos = uniq.map((v) => {
+          const cor = colorMap[v] || [100, 149, 237, 0.45];
           return {
             value: v,
             label: v,
@@ -420,17 +411,14 @@ require([
       return;
     }
 
-
-    // Trilhas - LINHA CONTÍNUA E MAIS FINA
     if (nome === "Trilhas") {
       renderer = new UniqueValueRenderer({ field: "classificacao" });
       const layer = new GeoJSONLayer({ url: cfg.url, title: nome, popupTemplate: popups[nome], renderer });
 
       layer.when(async () => {
         const { features } = await layer.queryFeatures({ returnGeometry: false, outFields: ["classificacao"] });
-        const uniq = [...new Set(features.map(f => f.attributes.classificacao))];
-        
-        // Define a ordem desejada
+        const uniq = [...new Set(features.map((f) => f.attributes.classificacao))];
+
         const ordemDesejada = ["Baixa dificuldade", "Média dificuldade", "Alta dificuldade"];
         const uniqOrdenado = uniq.sort((a, b) => {
           const indexA = ordemDesejada.indexOf(a);
@@ -444,8 +432,8 @@ require([
           symbol: {
             type: "simple-line",
             color: hexToRgba(paletteTrilhas[i % paletteTrilhas.length], 1.0),
-            width: 1.5,  // linha mais fina
-            style: "solid"  // linha contínua
+            width: 1.5,
+            style: "solid"
           }
         }));
         layer.renderer = renderer;

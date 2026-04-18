@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mapa de Situação - RPPN Recanto das Pedras</title>
+  <title>Mapa de Situacao - RPPN Recanto das Pedras</title>
   <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
   <link rel="stylesheet" href="estilo.css">
   <script src="https://js.arcgis.com/4.29/"></script>
@@ -11,12 +11,13 @@
 
 <body>
   <header>
-    <h1>WebMap de Situação da RPPN Recanto das Pedras</h1>
+    <a href="index.html" class="back-button" aria-label="Voltar ao portal">Voltar</a>
+    <h1>WebMap de Situacao da RPPN Recanto das Pedras</h1>
     <select id="basemapSelect">
-      <option value="satellite">Satélite (Esri)</option>
-      <option value="hybrid">Satélite + Rotas</option>
-      <option value="topo-vector">Topográfico</option>
-      <option value="google-satelite">Google Satélite</option>
+      <option value="google-satelite" selected>Google Satelite</option>
+      <option value="satellite">Satelite (Esri)</option>
+      <option value="hybrid">Satelite + Rotas</option>
+      <option value="topo-vector">Topografico</option>
       <option value="google-streets">Google Ruas</option>
     </select>
   </header>

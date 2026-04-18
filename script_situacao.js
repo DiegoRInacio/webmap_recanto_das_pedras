@@ -7,59 +7,75 @@ require([
   "esri/Basemap"
 ], function (Map, MapView, GeoJSONLayer, Graphic, WebTileLayer, Basemap) {
 
-  // ---- MAPA BASE ----
-  const map = new Map({ basemap: "hybrid" });
+  function createGoogleBasemap(tipo) {
+    let urlTemplate = "https://mt1.google.com/vt/lyrs=s&x={col}&y={row}&z={level}";
+
+    switch (tipo) {
+      case "google-hybrid":
+        urlTemplate = "https://mt1.google.com/vt/lyrs=y&x={col}&y={row}&z={level}";
+        break;
+      case "google-streets":
+        urlTemplate = "https://mt1.google.com/vt/lyrs=m&x={col}&y={row}&z={level}";
+        break;
+      case "google-satelite":
+      default:
+        urlTemplate = "https://mt1.google.com/vt/lyrs=s&x={col}&y={row}&z={level}";
+        break;
+    }
+
+    const googleLayer = new WebTileLayer({
+      urlTemplate,
+      copyright: "© Google Maps"
+    });
+
+    return new Basemap({
+      baseLayers: [googleLayer],
+      title: "Google Maps",
+      id: `google-basemap-${tipo}`
+    });
+  }
+
+  function applyBasemap(map, valor) {
+    if (valor === "satellite" || valor === "hybrid" || valor === "topo-vector") {
+      map.basemap = valor;
+      return;
+    }
+
+    if (valor.startsWith("google-")) {
+      map.basemap = createGoogleBasemap(valor);
+    }
+  }
+
+  const map = new Map({ basemap: createGoogleBasemap("google-satelite") });
 
   const view = new MapView({
     container: "viewDiv",
     map,
     center: [-43.012915, -22.312919],
-    zoom: 14
-  });
-
-  // ---- MENU DE BASEMAP COM GOOGLE MAPS ----
-  const basemapSelect = document.getElementById("basemapSelect");
-  basemapSelect.addEventListener("change", () => {
-    const valor = basemapSelect.value;
-    
-    // Se for basemap do Esri, usa diretamente
-    if (valor === "satellite" || valor === "hybrid" || valor === "topo-vector") {
-      map.basemap = valor;
-    } 
-    // Se for Google Maps, cria WebTileLayer customizado
-    else if (valor.startsWith("google-")) {
-      let urlTemplate;
-      
-      switch(valor) {
-        case "google-satelite":
-          urlTemplate = "https://mt1.google.com/vt/lyrs=s&x={col}&y={row}&z={level}";
-          break;
-        case "google-hybrid":
-          urlTemplate = "https://mt1.google.com/vt/lyrs=y&x={col}&y={row}&z={level}";
-          break;
-        case "google-streets":
-          urlTemplate = "https://mt1.google.com/vt/lyrs=m&x={col}&y={row}&z={level}";
-          break;
+    zoom: 14,
+    popup: {
+      dockEnabled: window.matchMedia("(max-width: 768px)").matches,
+      dockOptions: {
+        buttonEnabled: true,
+        breakpoint: false,
+        position: "bottom-center"
       }
-      
-      const googleLayer = new WebTileLayer({
-        urlTemplate: urlTemplate,
-        copyright: "© Google Maps"
-      });
-      
-      const googleBasemap = new Basemap({
-        baseLayers: [googleLayer],
-        title: "Google Maps",
-        id: "google-basemap"
-      });
-      
-      map.basemap = googleBasemap;
     }
   });
 
-  // ---- BOTÃO DE ROTA (ajustado abaixo do zoom) ----
+  const basemapSelect = document.getElementById("basemapSelect");
+  basemapSelect.value = "google-satelite";
+  applyBasemap(map, "google-satelite");
+  view.when(function () {
+    applyBasemap(map, "google-satelite");
+  });
+
+  basemapSelect.addEventListener("change", function () {
+    applyBasemap(map, basemapSelect.value);
+  });
+
   const routeButton = document.createElement("button");
-  routeButton.textContent = "🚗 Traçar rota";
+  routeButton.textContent = "Tracar rota";
   routeButton.style.cssText = `
     position: absolute;
     top: 160px;
@@ -79,65 +95,70 @@ require([
   `;
   document.body.appendChild(routeButton);
 
-  // ---- AJUSTE RESPONSIVO ----
-  window.addEventListener("resize", () => {
-    routeButton.style.top = window.innerWidth < 768 ? "190px" : "160px";
-  });
+  function syncResponsiveUi() {
+    const isMobile = window.innerWidth < 768;
+    routeButton.style.top = isMobile ? "190px" : "160px";
+    routeButton.style.left = isMobile ? "12px" : "15px";
+    routeButton.style.maxWidth = isMobile ? "calc(100vw - 24px)" : "none";
+    view.popup.dockEnabled = isMobile;
+  }
 
-  // ---- POPUPS ----
+  syncResponsiveUi();
+  window.addEventListener("resize", syncResponsiveUi);
+
   const popups = {
-    "Limite do Imóvel": {
-      title: "Limite do Imóvel",
+    "Limite do Imovel": {
+      title: "Limite do Imovel",
       content: [{ type: "fields", fieldInfos: [
-        { fieldName: "Nome", label: "Nome do Imóvel" },
-        { fieldName: "CAR", label: "Número do CAR" }
+        { fieldName: "Nome", label: "Nome do Imovel" },
+        { fieldName: "CAR", label: "Numero do CAR" }
       ]}]
     },
     "RPPN": {
-      title: "Reserva Particular do Patrimônio Natural",
+      title: "Reserva Particular do Patrimonio Natural",
       content: [{ type: "fields", fieldInfos: [
         { fieldName: "nome", label: "Nome da RPPN" },
-        { fieldName: "jurisdicao", label: "Jurisdição" },
+        { fieldName: "jurisdicao", label: "Jurisdicao" },
         { fieldName: "categoria", label: "Categoria" },
-        { fieldName: "area ha", label: "Área (ha)" }
+        { fieldName: "area ha", label: "Area (ha)" }
       ]}]
     },
     "Hidrografia": {
       title: "Hidrografia",
       content: [{ type: "fields", fieldInfos: [
-        { fieldName: "NOME", label: "Nome do Curso d'Água" },
-        { fieldName: "SHAPE_Leng", label: "Extensão (° decimais)" }
+        { fieldName: "NOME", label: "Nome do Curso d'Agua" },
+        { fieldName: "SHAPE_Leng", label: "Extensao (graus decimais)" }
       ]}]
     },
-    "Unidades de Conservação": {
-      title: "Unidade de Conservação",
+    "Unidades de Conservacao": {
+      title: "Unidade de Conservacao",
       content: [{ type: "fields", fieldInfos: [
         { fieldName: "nome", label: "Nome" },
-        { fieldName: "jurisdicao", label: "Jurisdição" },
+        { fieldName: "jurisdicao", label: "Jurisdicao" },
         { fieldName: "categoria", label: "Categoria" },
-        { fieldName: "municipio", label: "Município" },
+        { fieldName: "municipio", label: "Municipio" },
         { fieldName: "tipo", label: "Tipo" },
-        { fieldName: "area ha", label: "Área (ha)" }
+        { fieldName: "area ha", label: "Area (ha)" }
       ]}]
     }
   };
 
-  // ---- CAMADAS ----
   const camadas = [
-    { nome: "Limite do Imóvel", url: "camadas/imovel.geojson", cor: "#ff6600", tipo: "polygon", fill: [255,102,0,0.1], width: 3 },
-    { nome: "RPPN", url: "camadas/rppn.geojson", cor: "#00ff80", tipo: "polygon", fill: [0,255,128,0.15], width: 2 },
+    { nome: "Limite do Imovel", url: "camadas/imovel.geojson", cor: "#ff6600", tipo: "polygon", fill: [255, 102, 0, 0.1], width: 3 },
+    { nome: "RPPN", url: "camadas/rppn.geojson", cor: "#00ff80", tipo: "polygon", fill: [0, 255, 128, 0.15], width: 2 },
     { nome: "Hidrografia", url: "camadas/hidrografia_imovel.geojson", cor: "#00bfff", tipo: "line", width: 2 },
-    { nome: "Unidades de Conservação", url: "camadas/ucs_municipio.geojson", cor: "#006400", tipo: "polygon", fill: [0,100,0,0.15], width: 2 }
+    { nome: "Unidades de Conservacao", url: "camadas/ucs_municipio.geojson", cor: "#006400", tipo: "polygon", fill: [0, 100, 0, 0.15], width: 2 }
   ];
 
   const layersDict = {};
 
-  const simpleLineRenderer = (color, width=2) => ({
-    type: "simple",
-    symbol: { type: "simple-line", color, width }
-  });
+  const simpleLineRenderer = function (color, width) {
+    return {
+      type: "simple",
+      symbol: { type: "simple-line", color, width: width || 2 }
+    };
+  };
 
-  // ---- LEGENDA ----
   const painel = document.createElement("div");
   painel.id = "painelLegenda";
   painel.style.cssText = `
@@ -163,10 +184,9 @@ require([
   `;
 
   const conteudo = document.createElement("div");
-  conteudo.style.cssText = `padding: 10px 14px; display: block;`;
+  conteudo.style.cssText = "padding: 10px 14px; display: block;";
 
-  // Alterna abertura e fechamento da legenda
-  header.addEventListener("click", () => {
+  header.addEventListener("click", function () {
     const aberto = conteudo.style.display === "block";
     conteudo.style.display = aberto ? "none" : "block";
     header.textContent = aberto ? "Legenda ▼" : "Legenda ▲";
@@ -176,11 +196,7 @@ require([
   painel.appendChild(conteudo);
   view.ui.add(painel, "top-right");
 
-  // --- COMPORTAMENTO RESPONSIVO ---
-  const isMobile = window.matchMedia("(max-width: 768px)").matches;
-
-  if (isMobile) {
-    // Versão mobile: legenda fixa no rodapé
+  if (window.matchMedia("(max-width: 768px)").matches) {
     painel.style.position = "fixed";
     painel.style.left = "0";
     painel.style.right = "0";
@@ -194,13 +210,7 @@ require([
     painel.style.zIndex = "9999";
     painel.style.display = "block";
     painel.style.opacity = "1";
-
-    // Pequeno delay pra não interferir com o carregamento do mapa
-    setTimeout(() => {
-      painel.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 400);
   } else {
-    // Versão desktop: canto superior direito
     painel.style.position = "absolute";
     painel.style.top = "70px";
     painel.style.right = "10px";
@@ -209,12 +219,12 @@ require([
     painel.style.overflowY = "auto";
   }
 
-  // ---- FUNÇÃO DE RECONSTRUÇÃO DE LEGENDA ----
   function rebuildLegendContent() {
     conteudo.innerHTML = "";
 
-    Object.entries(layersDict).forEach(([nome, layer]) => {
-
+    Object.entries(layersDict).forEach(function (entry) {
+      const nome = entry[0];
+      const layer = entry[1];
       const symbol = layer.legendaSimbolo;
       if (!symbol) return;
 
@@ -227,7 +237,9 @@ require([
       checkbox.type = "checkbox";
       checkbox.checked = layer.visible ?? true;
       checkbox.style.marginRight = "8px";
-      checkbox.addEventListener("change", e => (layer.visible = e.target.checked));
+      checkbox.addEventListener("change", function (e) {
+        layer.visible = e.target.checked;
+      });
       label.appendChild(checkbox);
 
       const simbolo = document.createElement("div");
@@ -236,19 +248,13 @@ require([
       simbolo.style.marginRight = "8px";
       simbolo.style.borderRadius = "3px";
 
-      // POLÍGONO
       if (symbol.type === "simple-fill") {
         const fill = symbol.color;
         const out = symbol.outline;
-
-        simbolo.style.backgroundColor =
-          `rgba(${fill[0]}, ${fill[1]}, ${fill[2]}, ${fill[3]})`;
-
-        simbolo.style.border =
-          `${out.width}px solid ${out.color}`;
+        simbolo.style.backgroundColor = `rgba(${fill[0]}, ${fill[1]}, ${fill[2]}, ${fill[3]})`;
+        simbolo.style.border = `${out.width}px solid ${out.color}`;
       }
 
-      // LINHA
       if (symbol.type === "simple-line") {
         simbolo.style.background = symbol.color;
         simbolo.style.height = `${Math.max(3, symbol.width * 2)}px`;
@@ -266,8 +272,7 @@ require([
     });
   }
 
-  // ---- CRIAÇÃO DAS CAMADAS ----
-  camadas.forEach(cfg => {
+  camadas.forEach(function (cfg) {
     const simbologia = cfg.tipo === "polygon"
       ? {
           type: "simple",
@@ -286,7 +291,6 @@ require([
       renderer: simbologia
     });
 
-    // Guarda a simbologia para a legenda
     layer.legendaSimbolo = simbologia.symbol;
 
     map.add(layer);
@@ -295,14 +299,13 @@ require([
 
   rebuildLegendContent();
 
-  // ---- ROTA VIA OSRM ----
   let rotaAtiva = false;
   let pontos = [];
 
-  routeButton.addEventListener("click", () => {
+  routeButton.addEventListener("click", function () {
     rotaAtiva = !rotaAtiva;
     routeButton.style.background = rotaAtiva ? "#00b894" : "#0079c1";
-    routeButton.textContent = rotaAtiva ? "🗺️ Clique dois pontos" : "🚗 Traçar rota";
+    routeButton.textContent = rotaAtiva ? "Clique em dois pontos" : "Tracar rota";
     if (!rotaAtiva) {
       pontos = [];
       view.graphics.removeAll();
@@ -327,7 +330,7 @@ require([
     view.graphics.add(rota);
   }
 
-  view.on("click", (event) => {
+  view.on("click", function (event) {
     if (!rotaAtiva) return;
 
     const ponto = new Graphic({
@@ -341,7 +344,7 @@ require([
       calcularRotaOSRM(pontos[0], pontos[1]);
       rotaAtiva = false;
       routeButton.style.background = "#0079c1";
-      routeButton.textContent = "🚗 Traçar rota";
+      routeButton.textContent = "Tracar rota";
       pontos = [];
     }
   });
