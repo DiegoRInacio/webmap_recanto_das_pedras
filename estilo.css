@@ -3,6 +3,21 @@ body {
   font-family: Arial, sans-serif;
 }
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+body.map-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 header {
   background-color: #0079c1;
   color: white;
@@ -55,15 +70,15 @@ select {
 }
 
 #viewDiv {
-  height: calc(100vh - 50px);
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
   width: 100%;
 }
 
-html, body, #viewDiv {
-  margin: 0;
-  padding: 0;
+html,
+body {
   height: 100%;
-  width: 100%;
 }
 
 #painelLegenda {
@@ -152,13 +167,13 @@ html, body, #viewDiv {
   .esri-popup--is-docked .esri-popup__main-container {
     width: min(92vw, 420px) !important;
     max-width: min(92vw, 420px) !important;
-    max-height: 42vh !important;
+    max-height: 38vh !important;
     border-radius: 14px 14px 0 0;
-    margin: 0 auto;
+    margin: 0 auto 64px !important;
   }
 
   .esri-popup--is-docked .esri-popup__content {
-    max-height: calc(42vh - 110px) !important;
+    max-height: calc(38vh - 110px) !important;
   }
 }
 
@@ -174,11 +189,11 @@ html, body, #viewDiv {
   .esri-popup--is-docked .esri-popup__main-container {
     width: calc(100vw - 16px) !important;
     max-width: calc(100vw - 16px) !important;
-    max-height: 48vh !important;
+    max-height: 40vh !important;
   }
 
   .esri-popup--is-docked .esri-popup__content {
-    max-height: calc(48vh - 110px) !important;
+    max-height: calc(40vh - 110px) !important;
   }
 }
 
