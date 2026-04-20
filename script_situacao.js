@@ -75,11 +75,11 @@ require([
   });
 
   const routeButton = document.createElement("button");
-  routeButton.textContent = "Tracar rota";
+  routeButton.textContent = "Traçar rota";
   routeButton.style.cssText = `
     position: absolute;
-    top: 160px;
-    left: 15px;
+    top: 76px;
+    right: 16px;
     z-index: 9999;
     background: #0079c1;
     color: white;
@@ -97,8 +97,9 @@ require([
 
   function syncResponsiveUi() {
     const isMobile = window.innerWidth < 768;
-    routeButton.style.top = isMobile ? "190px" : "160px";
-    routeButton.style.left = isMobile ? "12px" : "15px";
+    routeButton.style.top = isMobile ? "160px" : "76px";
+    routeButton.style.left = "auto";
+    routeButton.style.right = isMobile ? "12px" : "16px";
     routeButton.style.maxWidth = isMobile ? "calc(100vw - 24px)" : "none";
     view.popup.dockEnabled = isMobile;
   }
@@ -305,7 +306,7 @@ require([
   routeButton.addEventListener("click", function () {
     rotaAtiva = !rotaAtiva;
     routeButton.style.background = rotaAtiva ? "#00b894" : "#0079c1";
-    routeButton.textContent = rotaAtiva ? "Clique em dois pontos" : "Tracar rota";
+    routeButton.textContent = rotaAtiva ? "Clique em dois pontos" : "Traçar rota";
     if (!rotaAtiva) {
       pontos = [];
       view.graphics.removeAll();
@@ -344,7 +345,7 @@ require([
       calcularRotaOSRM(pontos[0], pontos[1]);
       rotaAtiva = false;
       routeButton.style.background = "#0079c1";
-      routeButton.textContent = "Tracar rota";
+      routeButton.textContent = "Traçar rota";
       pontos = [];
     }
   });
